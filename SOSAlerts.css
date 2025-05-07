@@ -1,0 +1,48 @@
+.container {
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+  }
+  
+  .sos-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .sos-table th, .sos-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .status {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-weight: bold;
+  }
+  
+  .active {
+    background: #ffdddd;
+    color: #d9534f;
+  }
+  
+  .resolved {
+    background: #e0e0e0;
+    color: #5a5a5a;
+  }
+  
+  .resolve-btn {
+    background: #ff4d4d;
+    color: white;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .resolve-btn:hover {
+    background: #d9534f;
+  }
+  
