@@ -91,13 +91,11 @@ export const Analytics = () => {
     locationData: {}
   });
 
-  const [timeFilter, setTimeFilter] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [selectedLocation, setSelectedLocation] = useState<string>('all');
   const [locationStats, setLocationStats] = useState<LocationStats>({});
 
   const [reportTypes, setReportTypes] = useState<string[]>([]);
   const [selectedReportType, setSelectedReportType] = useState<string>("");
-  const [filteredReports, setFilteredReports] = useState<any[]>([]);
 
    // Add these new functions
    const fetchReportTypes = async () => {
@@ -117,6 +115,7 @@ export const Analytics = () => {
 
   useEffect(() => {
     fetchReportLocations();
+    fetchReportTypes();
     const fetchAllData = async () => {
       try {
         const sosQuery = query(collection(db, 'sos_alerts'), orderBy('timestamp', 'desc'));
@@ -236,28 +235,9 @@ export const Analytics = () => {
     }
   };
 
-  const getWeekNumber = (date: Date): string => {
-    const startOfYear = new Date(date.getFullYear(), 0, 1);
-    const weekNumber = Math.ceil(
-      ((date.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7
-    );
-    return `${date.getFullYear()}-W${weekNumber.toString().padStart(2, '0')}`;
-  };
 
-  const getFilteredData = (locationName: string = 'all') => {
-    if (locationName === 'all') {
-      return Object.entries(locationStats).reduce((acc, [_, stats]) => {
-        Object.entries(stats.timeData[timeFilter]).forEach(([timeKey, data]) => {
-          if (!acc[timeKey]) acc[timeKey] = { accidents: 0, sos: 0 };
-          acc[timeKey].accidents += data.accidents;
-          acc[timeKey].sos += data.sos;
-        });
-        return acc;
-      }, {} as { [key: string]: { accidents: number; sos: number } });
-    }
 
-    return locationStats[locationName]?.timeData[timeFilter] || {};
-  };
+
 
   const chartData = {
     labels: reportData.labels,
@@ -374,63 +354,60 @@ return (
 
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} md={6}>
-        <FormControl fullWidth>
-  <InputLabel sx={{ color: '#189AB4' }}>Location Filter</InputLabel>
-  <Select
-    value={selectedLocation}
-    onChange={(e) => setSelectedLocation(e.target.value as string)}
-    label="Location Filter"
-    sx={{
-      '& .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#189AB4',
-      },
-      '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#05445E',
-      },
-      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#05445E',
-      },
-    }}
-  >
-    <MenuItem value="all">All Locations</MenuItem>
-    {Object.keys(reportData.locationData).map((location) => (
-      <MenuItem key={location} value={location}>
-        {location}
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl>
-
-
+          <FormControl fullWidth>
+            <InputLabel sx={{ color: '#189AB4' }}>Location Filter</InputLabel>
+            <Select
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value as string)}
+              label="Location Filter"
+              sx={{
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#189AB4',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#05445E',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#05445E',
+                },
+              }}
+            >
+              <MenuItem value="all">All Locations</MenuItem>
+              {Object.keys(reportData.locationData).map((location) => (
+                <MenuItem key={location} value={location}>
+                  {location}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Grid>
         <Grid item xs={12} md={6}>
-        <FormControl fullWidth>
-  <InputLabel sx={{ color: '#189AB4' }}>Location Filter</InputLabel>
-  <Select
-    value={selectedLocation}
-    onChange={(e) => setSelectedLocation(e.target.value as string)}
-    label="Location Filter"
-    sx={{
-      '& .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#189AB4',
-      },
-      '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#05445E',
-      },
-      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#05445E',
-      },
-    }}
-  >
-    <MenuItem value="all">All Locations</MenuItem>
-    {reportLocations.map((location) => (
-      <MenuItem key={location} value={location}>
-        {location}
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl>
-
+          <FormControl fullWidth>
+            <InputLabel sx={{ color: '#189AB4' }}>Report Type Filter</InputLabel>
+            <Select
+              value={selectedReportType}
+              onChange={(e) => setSelectedReportType(e.target.value as string)}
+              label="Report Type Filter"
+              sx={{
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#189AB4',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#05445E',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#05445E',
+                },
+              }}
+            >
+              <MenuItem value="">All Types</MenuItem>
+              {reportTypes.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Grid>
       </Grid>
 

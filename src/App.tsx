@@ -1,5 +1,5 @@
-import React from 'react';  
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';  
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Box, CssBaseline } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import Header from './components/Header';
@@ -9,6 +9,7 @@ import SOSAlerts from './pages/SOSAlerts';
 import Reports from './pages/Reports';
 import { Analytics } from './pages/Analytics';
 import { NotificationProvider } from './context/NotificationContext';
+import { trackPageView } from './utils/analytics';
 
 const theme = createTheme({
   palette: {
@@ -21,12 +22,24 @@ const theme = createTheme({
   },
 });
 
+// Component to track page views
+function PageTracker() {
+  const location = useLocation();
+  
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location]);
+
+  return null;
+}
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <NotificationProvider>
         <BrowserRouter>
+          <PageTracker />
           <Box sx={{ display: 'flex' }}>
             <Header />
             <Sidebar />
