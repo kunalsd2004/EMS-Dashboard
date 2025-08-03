@@ -28,6 +28,8 @@ function PageTracker() {
   
   useEffect(() => {
     trackPageView(location.pathname);
+    // Debug: Log page view for verification
+    console.log('Page view tracked:', location.pathname);
   }, [location]);
 
   return null;
