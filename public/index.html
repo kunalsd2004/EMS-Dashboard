@@ -24,6 +24,15 @@
   
   // Debug: Log to console to verify tag is loading
   console.log('Google Analytics tag loaded with ID: G-08TSMDDBJT');
+  
+  // Test event to verify tracking is working
+  setTimeout(() => {
+    gtag('event', 'page_view', {
+      page_title: 'EMS Dashboard',
+      page_location: window.location.href
+    });
+    console.log('Test event sent to Google Analytics');
+  }, 1000);
 </script>
   </head>
   <body>
