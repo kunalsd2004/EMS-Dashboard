@@ -1,4 +1,4 @@
-import React from 'react';  
+import React, { useEffect } from 'react';  
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Box, CssBaseline } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -9,6 +9,7 @@ import SOSAlerts from './pages/SOSAlerts';
 import Reports from './pages/Reports';
 import { Analytics } from './pages/Analytics';
 import { NotificationProvider } from './context/NotificationContext';
+import { initializeAnalytics, trackPageView } from './utils/googleAnalytics';
 
 const theme = createTheme({
   palette: {
@@ -22,6 +23,14 @@ const theme = createTheme({
 });
 
 function App() {
+  useEffect(() => {
+    // Initialize Google Analytics
+    initializeAnalytics();
+    
+    // Track initial page view
+    trackPageView('EMS Dashboard', window.location.pathname);
+  }, []);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

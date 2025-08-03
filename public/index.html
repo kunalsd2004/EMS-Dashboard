@@ -2,9 +2,31 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-    <meta name="description" content="EMS Dashboard" />
+    <meta
+      name="description"
+      content="EMS Dashboard - Emergency Management System Dashboard"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=%REACT_APP_GA_MEASUREMENT_ID%"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '%REACT_APP_GA_MEASUREMENT_ID%', {
+        page_title: 'EMS Dashboard',
+        custom_map: {
+          'custom_dimension1': 'user_type',
+          'custom_dimension2': 'page_section'
+        }
+      });
+    </script>
+    
     <title>EMS Dashboard</title>
   </head>
   <body>

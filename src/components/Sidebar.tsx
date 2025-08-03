@@ -19,6 +19,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
+import { trackDashboardSection, trackUserInteraction } from '../utils/googleAnalytics';
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -92,7 +93,11 @@ const Sidebar = () => {
           <ListItem 
             button 
             key={item.text}
-            onClick={() => navigate(item.path)}
+            onClick={() => {
+              navigate(item.path);
+              trackDashboardSection(item.text);
+              trackUserInteraction('navigation', { section: item.text, path: item.path });
+            }}
             selected={location.pathname === item.path}
             sx={{
               mb: 1,

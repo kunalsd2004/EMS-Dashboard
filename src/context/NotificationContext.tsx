@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, type ReactNode, useRef, useCallback } from "react";
 import { notificationSound } from "../utils/notificationSound";
 import { Snackbar, Alert, IconButton, Box, Typography, Slide } from "@mui/material";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
@@ -47,13 +47,13 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [currentNotification, setCurrentNotification] = useState<Notification | null | undefined>();
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [lastPlayedNotificationId, setLastPlayedNotificationId] = useState<string | null>(null);
+  const lastPlayedNotificationIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     notificationSound.requestNotificationPermission();
   }, []);
 
-  const addNotification = (notification: Omit<Notification, "id" | "timestamp" | "read">) => {
+  const addNotification = useCallback((notification: Omit<Notification, "id" | "timestamp" | "read">) => {
     const newNotification = {
       id: Date.now().toString(),
       timestamp: new Date(),
@@ -63,42 +63,42 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
 
     setNotifications((prev) => [newNotification, ...prev]);
     setCurrentNotification(newNotification);
-  };
+  }, []);
 
   // Play sound when a new notification is received
   useEffect(() => {
     if (
       notifications.length > 0 &&
-      notifications[0].id !== lastPlayedNotificationId &&
+      notifications[0].id !== lastPlayedNotificationIdRef.current &&
       soundEnabled &&
       (notifications[0].sound === "sos" || notifications[0].sound === "report")
     ) {
       notificationSound.play(notifications[0].sound, notifications[0].message);
-      setLastPlayedNotificationId(notifications[0].id);
+      lastPlayedNotificationIdRef.current = notifications[0].id;
     }
-  }, [notifications, soundEnabled]);
+  }, [notifications.length, soundEnabled]); // Only depend on length and soundEnabled
 
-  const markAsRead = (id: string) => {
+  const markAsRead = useCallback((id: string) => {
     setNotifications((prev) =>
       prev.map((notification) => (notification.id === id ? { ...notification, read: true } : notification))
     );
-  };
+  }, []);
 
-  const clearAll = () => {
+  const clearAll = useCallback(() => {
     setNotifications([]);
-  };
+  }, []);
 
-  const toggleSound = () => {
+  const toggleSound = useCallback(() => {
     const newState = notificationSound.toggle();
     setSoundEnabled(newState);
-  };
+  }, []);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (currentNotification) {
       markAsRead(currentNotification.id);
       setCurrentNotification(null);
     }
-  };
+  }, [currentNotification, markAsRead]);
 
   return (
     <NotificationContext.Provider

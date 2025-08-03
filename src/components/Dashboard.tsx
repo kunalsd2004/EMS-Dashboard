@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { Typography, Paper, Grid, Snackbar, Alert, Box } from "@mui/material"
 import { collection, onSnapshot, query, orderBy, limit } from "firebase/firestore"
 import { db } from "../config/firebaseConfig"
@@ -20,6 +20,15 @@ const Dashboard = () => {
   const { addNotification } = useNotifications()
   const [isSoundPlaying, setIsSoundPlaying] = useState(false);
   const [stopAudio, setStopAudio] = useState<() => void>(() => () => {});
+
+  // Use refs to track latest IDs to prevent infinite re-renders
+  const latestSOSIdRef = useRef<string | null>(null);
+  const latestReportIdRef = useRef<string | null>(null);
+  
+  // Debug render counter
+  const renderCount = useRef(0);
+  renderCount.current += 1;
+  console.log(`Dashboard rendered ${renderCount.current} times`);
 
   const playNotificationSound = (soundType: string) => {
     if (!isSoundPlaying) {
@@ -48,9 +57,8 @@ const Dashboard = () => {
   }, [])
 
   useEffect(() => {
-    let latestSOSIdRef = sosAlerts.length > 0 ? sosAlerts[0].id : null;
-    let latestReportIdRef = reports.length > 0 ? reports[0].id : null;
-  
+    console.log("Dashboard useEffect - Setting up Firebase listeners");
+    
     // Listen for SOS Alerts
     const sosQuery = query(collection(db, "sos_alerts"), orderBy("timestamp", "desc"), limit(10));
     const unsubscribeSOS = onSnapshot(sosQuery, (snapshot) => {
@@ -58,9 +66,9 @@ const Dashboard = () => {
         const newAlerts: SOSAlert[] = [];
   
         snapshot.docChanges().forEach((change) => {
-          if (change.type === "added" && change.doc.id !== latestSOSIdRef) {
+          if (change.type === "added" && change.doc.id !== latestSOSIdRef.current) {
             const data = change.doc.data();
-            latestSOSIdRef = change.doc.id; // Update latest received ID
+            latestSOSIdRef.current = change.doc.id; // Update latest received ID
   
             addNotification({
               message: `New SOS Alert from ${data.contact || "Unknown"}`,
@@ -83,6 +91,7 @@ const Dashboard = () => {
         });
   
         if (newAlerts.length > 0) {
+          console.log("New SOS alerts received:", newAlerts.length);
           setSOSAlerts((prev) => [...newAlerts, ...prev]);
         }
       } catch (err) {
@@ -97,9 +106,9 @@ const Dashboard = () => {
         const newReports: Report[] = [];
   
         snapshot.docChanges().forEach((change) => {
-          if (change.type === "added" && change.doc.id !== latestReportIdRef) {
+          if (change.type === "added" && change.doc.id !== latestReportIdRef.current) {
             const data = change.doc.data();
-            latestReportIdRef = change.doc.id; // Update latest received ID
+            latestReportIdRef.current = change.doc.id; // Update latest received ID
   
             addNotification({
               message: `New ${data.type || "Unknown"} Report - Severity: ${data.severity || "Unknown"}`,
@@ -127,6 +136,7 @@ const Dashboard = () => {
         });
   
         if (newReports.length > 0) {
+          console.log("New reports received:", newReports.length);
           setReports((prev) => [...newReports, ...prev]);
         }
       } catch (err) {
@@ -135,10 +145,11 @@ const Dashboard = () => {
     });
   
     return () => {
+      console.log("Dashboard useEffect - Cleaning up Firebase listeners");
       unsubscribeSOS();
       unsubscribeReports();
     };
-  }, [handleError, addNotification]);
+  }, []); // Remove dependencies to prevent infinite re-renders
   
   
 
